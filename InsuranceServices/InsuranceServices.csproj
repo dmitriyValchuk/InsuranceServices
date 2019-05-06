@@ -45,10 +45,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
@@ -151,6 +159,48 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\BonusMalus.cs" />
+    <Compile Include="Models\Car.cs" />
+    <Compile Include="Models\CarGlobalToInsuranceType.cs" />
+    <Compile Include="Models\CarGlobalType.cs" />
+    <Compile Include="Models\CarInsuranceType.cs" />
+    <Compile Include="Models\Chart.cs" />
+    <Compile Include="Models\CityOfRegistration.cs" />
+    <Compile Include="Models\CityOrCountryOfRegToZone.cs" />
+    <Compile Include="Models\Client.cs" />
+    <Compile Include="Models\ClientCar.cs" />
+    <Compile Include="Models\Company.cs" />
+    <Compile Include="Models\CompanyContractTypes.cs" />
+    <Compile Include="Models\CompanyDetail.cs" />
+    <Compile Include="Models\CompanyFeature.cs" />
+    <Compile Include="Models\CompanyFeatureToCompany.cs" />
+    <Compile Include="Models\CompanyIMG.cs" />
+    <Compile Include="Models\CompanyMiddleman.cs" />
+    <Compile Include="Models\Contract.cs" />
+    <Compile Include="Models\ContractFranchise.cs" />
+    <Compile Include="Models\ContractType.cs" />
+    <Compile Include="Models\CountryOfRegistration.cs" />
+    <Compile Include="Models\C__MigrationHistory.cs" />
+    <Compile Include="Models\DiscountByQuantity.cs" />
+    <Compile Include="Models\DiscountForClientWithPrivilegies.cs" />
+    <Compile Include="Models\Document.cs" />
+    <Compile Include="Models\DocumentType.cs" />
+    <Compile Include="Models\Franchise.cs" />
+    <Compile Include="Models\ImageType.cs" />
+    <Compile Include="Models\InsuranceServicesContext.cs" />
+    <Compile Include="Models\InsuranceZoneOfRegistration.cs" />
+    <Compile Include="Models\K1.cs" />
+    <Compile Include="Models\K2.cs" />
+    <Compile Include="Models\K3.cs" />
+    <Compile Include="Models\K4.cs" />
+    <Compile Include="Models\K5.cs" />
+    <Compile Include="Models\K6.cs" />
+    <Compile Include="Models\K7.cs" />
+    <Compile Include="Models\Middleman.cs" />
+    <Compile Include="Models\Privileges.cs" />
+    <Compile Include="Models\RegioneOfRegistration.cs" />
+    <Compile Include="Models\sysdiagrams.cs" />
+    <Compile Include="Models\TSC.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -195,7 +245,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
