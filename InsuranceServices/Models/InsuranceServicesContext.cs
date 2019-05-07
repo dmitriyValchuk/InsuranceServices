@@ -311,9 +311,19 @@ namespace InsuranceServices.Models
                 .WillCascadeOnDelete(false);
 
             modelBuilder.Entity<InsuranceZoneOfRegistration>()
+                .HasMany(e => e.CityOfRegistration)
+                .WithOptional(e => e.InsuranceZoneOfRegistration)
+                .HasForeignKey(e => e.IdZoneOfRegistration);
+
+            modelBuilder.Entity<InsuranceZoneOfRegistration>()
                 .HasMany(e => e.CityOrCountryOfRegToZone)
                 .WithOptional(e => e.InsuranceZoneOfRegistration)
                 .HasForeignKey(e => e.IdInsuranceZoneOfReg);
+
+            modelBuilder.Entity<InsuranceZoneOfRegistration>()
+                .HasMany(e => e.CountryOfRegistration)
+                .WithOptional(e => e.InsuranceZoneOfRegistration)
+                .HasForeignKey(e => e.IdZoneOfRegistration);
 
             modelBuilder.Entity<InsuranceZoneOfRegistration>()
                 .HasMany(e => e.K2)

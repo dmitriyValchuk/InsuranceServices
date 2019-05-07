@@ -155,6 +155,7 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\ConditionsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -204,30 +205,39 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\bootstrap-theme.css" />
-    <Content Include="Content\bootstrap-theme.min.css" />
-    <Content Include="Content\bootstrap.css" />
-    <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\css\calc.css" />
+    <Content Include="Content\css\loading.css" />
+    <Content Include="Content\css\scaffolding.css" />
+    <Content Include="Content\img\close.svg" />
+    <Content Include="Content\img\crying.svg" />
+    <Content Include="Content\img\icons.svg" />
+    <Content Include="Content\img\logo.svg" />
+    <Content Include="Content\img\partners\ASKA.png" />
+    <Content Include="Content\img\partners\ASKODS.png" />
+    <Content Include="Content\img\partners\AXA.png" />
+    <Content Include="Content\img\partners\brockbis.png" />
+    <Content Include="Content\img\partners\gardian.png" />
+    <Content Include="Content\img\partners\globus.png" />
+    <Content Include="Content\img\partners\ORANTA.png" />
+    <Content Include="Content\img\partners\Pro100.png" />
+    <Content Include="Content\img\partners\providna.png" />
+    <Content Include="Content\img\partners\PZU.png" />
+    <Content Include="Content\img\partners\TAS.png" />
+    <Content Include="Content\img\partners\ukr-ins-group.png" />
+    <Content Include="Content\img\partners\UNIQA.png" />
+    <Content Include="Content\img\svgs.svg" />
     <Content Include="favicon.ico" />
-    <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
-    <Content Include="Content\Site.css" />
-    <Content Include="Scripts\bootstrap.js" />
-    <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="ApplicationInsights.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Scripts\jquery-3.3.1.intellisense.js" />
-    <Content Include="Scripts\jquery-3.3.1.js" />
-    <Content Include="Scripts\jquery-3.3.1.min.js" />
-    <Content Include="Scripts\jquery-3.3.1.slim.js" />
-    <Content Include="Scripts\jquery-3.3.1.slim.min.js" />
-    <None Include="Scripts\jquery.validate-vsdoc.js" />
-    <Content Include="Scripts\jquery.validate.js" />
-    <Content Include="Scripts\jquery.validate.min.js" />
-    <Content Include="Scripts\jquery.validate.unobtrusive.js" />
-    <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
-    <Content Include="Scripts\modernizr-2.8.3.js" />
+    <Content Include="Scripts\0.app.js" />
+    <Content Include="Scripts\1.app.js" />
+    <Content Include="Scripts\2.app.js" />
+    <Content Include="Scripts\3.app.js" />
+    <Content Include="Scripts\build.js" />
+    <Content Include="Scripts\loading.js" />
+    <Content Include="Scripts\scripts.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -245,19 +255,16 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="fonts\" />
+    <Folder Include="Views\Conditions\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="fonts\glyphicons-halflings-regular.woff2" />
-    <Content Include="fonts\glyphicons-halflings-regular.woff" />
-    <Content Include="fonts\glyphicons-halflings-regular.ttf" />
-    <Content Include="fonts\glyphicons-halflings-regular.eot" />
-    <Content Include="Content\bootstrap.min.css.map" />
-    <Content Include="Content\bootstrap.css.map" />
-    <Content Include="Content\bootstrap-theme.min.css.map" />
-    <Content Include="Content\bootstrap-theme.css.map" />
     <None Include="packages.config" />
-    <Content Include="Scripts\jquery-3.3.1.slim.min.map" />
-    <Content Include="Scripts\jquery-3.3.1.min.map" />
+    <Content Include="Scripts\0.app.js.map" />
+    <Content Include="Scripts\1.app.js.map" />
+    <Content Include="Scripts\2.app.js.map" />
+    <Content Include="Scripts\3.app.js.map" />
+    <Content Include="Scripts\build.js.map" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

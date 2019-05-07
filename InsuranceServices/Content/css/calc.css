@@ -1,0 +1,121 @@
+@media only screen and (max-width: 1195px) {
+  body {
+    font-size: 17px;
+  }
+}
+@media only screen and (max-width: 576px) {
+  body {
+    font-size: 16px;
+  }
+}
+pre {
+  position: fixed;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: left;
+  z-index: -1;
+}
+i {
+  font-style: italic;
+}
+.calc {
+  width: 100%;
+  text-align: center;
+}
+.header__no-underline {
+  font-family: "Source Sans Pro", sans-serif;
+  font-weight: 900;
+  margin-bottom: 20px;
+  color: #0093e8;
+}
+.header__no-underline::after {
+  display: none;
+}
+@media only screen and (max-width: 1195px) {
+  .header__no-underline {
+    margin-bottom: 7px;
+  }
+}
+@media only screen and (max-width: 576px) {
+  .header {
+    font-size: 28px;
+  }
+}
+.sub-header {
+  font-weight: bold;
+  font-size: 33px;
+  margin-bottom: 10px;
+}
+@media only screen and (max-width: 1195px) {
+  .sub-header {
+    font-size: 30px;
+  }
+}
+@media only screen and (max-width: 768px) {
+  .sub-header {
+    font-size: 26px;
+  }
+}
+@media only screen and (max-width: 576px) {
+  .sub-header {
+    font-size: 22px;
+    line-height: 1;
+    margin-bottom: 15px;
+  }
+}
+.sub-header__active {
+  color: #0093e8;
+}
+.sub2-header {
+  display: block;
+  font-size: 25px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+@media only screen and (max-width: 768px) {
+  .sub2-header {
+    font-size: 22px;
+  }
+}
+@media only screen and (max-width: 576px) {
+  .sub2-header {
+    line-height: 1;
+    font-size: 19px;
+  }
+}
+.form--wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+@media only screen and (max-width: 576px) {
+  .form--header {
+    line-height: 1;
+    margin-bottom: 25px;
+  }
+}
+.form--link {
+  color: #0093e8;
+  text-decoration: underline;
+}
+.form--link:hover {
+  text-decoration: none;
+}
+.form--block {
+  margin-bottom: 40px;
+}
+@media only screen and (max-width: 1195px) {
+  .form--block {
+    margin-bottom: 5px;
+  }
+}
+@media only screen and (max-width: 880px) {
+  .form--block {
+    margin-bottom: 20px;
+  }
+}
+@media only screen and (max-width: 576px) {
+  .form--block {
+    margin-bottom: 30px;
+  }
+}

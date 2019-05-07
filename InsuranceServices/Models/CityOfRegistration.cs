@@ -24,7 +24,11 @@ namespace InsuranceServices.Models
 
         public int? IdRegioneOfRegistration { get; set; }
 
+        public int? IdZoneOfRegistration { get; set; }
+
         public virtual RegioneOfRegistration RegioneOfRegistration { get; set; }
+
+        public virtual InsuranceZoneOfRegistration InsuranceZoneOfRegistration { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<CityOrCountryOfRegToZone> CityOrCountryOfRegToZone { get; set; }

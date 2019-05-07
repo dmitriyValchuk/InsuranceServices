@@ -14,5 +14,9 @@ namespace InsuranceServices.Models
         [Required]
         [StringLength(60)]
         public string Name { get; set; }
+
+        public int? IdZoneOfRegistration { get; set; }
+
+        public virtual InsuranceZoneOfRegistration InsuranceZoneOfRegistration { get; set; }
     }
 }
