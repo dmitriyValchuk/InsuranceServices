@@ -14,6 +14,19 @@ namespace InsuranceServices.Controllers
     {
         InsuranceServicesContext db = new InsuranceServicesContext();
 
+        enum ResponseType
+        {
+            Bad,
+            Critical,
+            Good
+        }
+
+        class ResponseToClient
+        {
+            public ResponseType responseType { get; set; }
+            public string responseText { get; set; }
+        }
+
         public string GetRegions()
         {
             JavaScriptSerializer js = new JavaScriptSerializer();
@@ -71,27 +84,205 @@ namespace InsuranceServices.Controllers
         [HttpPost]
         public string SendConditions()
         {
-            dynamic dataParsed = GetPotsRequestBody();
             JavaScriptSerializer js = new JavaScriptSerializer();
+            ResponseToClient responseToClient = new ResponseToClient();
+            List<ResponseToClient> warnings = new List<ResponseToClient>();
 
+            string defaultErrorMessage = "Будь ласка скористайтеся сервісом пізніше. Дякуємо за розуміння.";
+            string defaultConfigMessage = "За замовчанням встановлено";
+
+            dynamic dataParsed = GetPotsRequestBody();
+            if(dataParsed == null)
+            {
+                responseToClient.responseType = ResponseType.Critical;
+                responseToClient.responseText = "Виникла помилка з обробкою Ваших даних. " + defaultErrorMessage;
+                return js.Serialize(responseToClient);
+            }           
+
+            ConditionsForDocument conditionsForDocument = new ConditionsForDocument();
+
+            if(dataParsed.trans.type == null || dataParsed.trans.extra == null)
+            {
+                responseToClient.responseType = ResponseType.Critical;
+                responseToClient.responseText = "Виникла помилка при обробці даних. " + defaultErrorMessage;
+                return js.Serialize(responseToClient);
+            }
+            string currentTransportType = dataParsed.trans.type;
+            string currentInsurenceType = dataParsed.trans.extra;
+
+            //var a = db.CarGlobalType.Where(c => c.Name == currentTransportType).First();
+            //var b = db.CarInsuranceType.Where(c => c.Type == currentInsurenceType).First();
             Transport transport = new Transport();
-            //Type will be as A 1/A 2/B 1/B 2
-            transport.Type = dataParsed.trans.type;
-            transport.SubType = dataParsed.trans.extra;
+            CarGlobalType currentType = new CarGlobalType();
+            CarInsuranceType currentSubType = new CarInsuranceType();
+            currentType = db.CarGlobalType.Where(c => c.Name == currentTransportType).First();
+            currentSubType = db.CarInsuranceType.Where(c => c.Type == currentInsurenceType).First();
 
-            //CarGlobalType carGlobalType = db.CarGlobalType.Where(c => c.Name == transport.Type).First();
-            CarInsuranceType carInsuranceType = db.CarInsuranceType.Where(c => c.Type == transport.SubType).First();
+            transport.Type = currentType;
+            transport.SubType = currentSubType;
 
+            conditionsForDocument.Transport = transport;
+            
+            if(conditionsForDocument.Transport.Type == null || conditionsForDocument.Transport.SubType == null)
+            {
+                responseToClient.responseType = ResponseType.Critical;
+                responseToClient.responseText = "Не корректні дані для типу автомобіля.";
+                return js.Serialize(responseToClient);
+            }
+
+            PlaceOfRegistration placeOfRegistration = new PlaceOfRegistration();
             CityOfRegistration cityOfRegistration = new CityOfRegistration();
             CountryOfRegistration countryOfRegistration = new CountryOfRegistration();
 
             GetPlaceOfRegistration(dataParsed, ref cityOfRegistration, ref countryOfRegistration);
 
-            //check write in variable
-            var a = cityOfRegistration.Name;
-            var b = countryOfRegistration.Name;
+            placeOfRegistration.CityOfRegistration = cityOfRegistration;
+            placeOfRegistration.CountryOfRegistration = countryOfRegistration;
 
-            return js.Serialize("");
+            conditionsForDocument.PlaceOfRegistration = placeOfRegistration;
+            
+            if(placeOfRegistration.CityOfRegistration == null && placeOfRegistration.CountryOfRegistration == null)
+            {
+                responseToClient.responseType = ResponseType.Critical;
+                responseToClient.responseText = "Виникла проблема з місцем реєстрації Вашого авто. Будь ласка поверніться на попередню сторінку та змініть місце реєстрації автомобіля";
+                return js.Serialize(responseToClient);
+            }
+
+            bool isLegalEntity;
+            bool parseIsLegalEntityResult = bool.TryParse(dataParsed.isLegalEntity.ToString(), out isLegalEntity);
+            if (!parseIsLegalEntityResult)
+            {
+                isLegalEntity = false;
+                responseToClient.responseType = ResponseType.Bad;
+                responseToClient.responseText = "Не вдалося отримати дані по юридичній або фізичнії особі. " + defaultConfigMessage + " \"Фізична особа\".";
+                warnings.Add(responseToClient);
+            }
+            conditionsForDocument.IsLegalEntity = isLegalEntity;
+
+            PeriodOfDocument periodOfDocument = new PeriodOfDocument();
+            double currentPeriod;
+            bool parsePeriodResult = double.TryParse(dataParsed.period.term.ToString(), out currentPeriod);
+            if (!parsePeriodResult)
+            {
+                currentPeriod = 12.0;
+                responseToClient.responseType = ResponseType.Bad;
+                responseToClient.responseText = "Не вдалося отримати дані по періоду страхування. " + defaultConfigMessage + " \"12 місяців\".";
+                warnings.Add(responseToClient);
+            }
+            periodOfDocument.Period = currentPeriod;
+
+            bool isMTC;
+            bool parseIsMTCResult = bool.TryParse(dataParsed.period.otk.ToString(), out isMTC);
+            if (!parseIsMTCResult)
+            {
+                isMTC = false;
+                responseToClient.responseType = ResponseType.Bad;
+                responseToClient.responseText = "Не вдалося отримати дані про необхідності проходження обов'язкового технічного контролю. " + defaultConfigMessage + " \"Не проходить\".";
+                warnings.Add(responseToClient);
+            }
+            periodOfDocument.isMTC = isMTC;
+            conditionsForDocument.PeriodOfDocument = periodOfDocument;
+
+            bool isUseAsTaxi;
+            bool parseIsTaxiCarResult = bool.TryParse(dataParsed.taxi.ToString(), out isUseAsTaxi);
+            if (!parseIsTaxiCarResult)
+            {
+                isUseAsTaxi = false;
+                responseToClient.responseType = ResponseType.Bad;
+                responseToClient.responseText = "Не вдалося з'ясувати чи використовується Ваше авто в таксі. " + defaultConfigMessage + " \"Не використовується\".";
+                warnings.Add(responseToClient);
+            }
+            conditionsForDocument.IsUseAsTaxi = isUseAsTaxi;
+
+
+            DriverAccident driverAccident = new DriverAccident();
+            bool isDriverWasInAccident;
+            bool parseIsDriverWasInAccident = bool.TryParse(dataParsed.dtp.dtpState.ToString(), out isDriverWasInAccident);
+            if (!parseIsDriverWasInAccident)
+            {
+                isDriverWasInAccident = false;
+                responseToClient.responseType = ResponseType.Bad;
+                responseToClient.responseText = "Не вдалося отримати дані про наявність страхових випадків. " + defaultConfigMessage + " \"Не було\".";
+                warnings.Add(responseToClient);
+            }
+            if (isDriverWasInAccident)
+            {
+                int currentLastAccidentYear;
+                bool parseLastAccidentYear = Int32.TryParse(dataParsed.dtp.dtpTerm.ToString(), out currentLastAccidentYear);
+                if (!parseLastAccidentYear)
+                {
+                    currentLastAccidentYear = 4;
+                    responseToClient.responseType = ResponseType.Bad;
+                    responseToClient.responseText = "Не вдалося отримати дані про час останнього страхового випадку. " + defaultConfigMessage + " \"Не було\".";
+                    warnings.Add(responseToClient);
+                }
+                //for 4 year and more, coef is same
+                driverAccident.IsDriverWasInAccident = isDriverWasInAccident;
+                driverAccident.LastAccidentYear = currentLastAccidentYear;
+            }
+            else
+            {
+                driverAccident.IsDriverWasInAccident = isDriverWasInAccident;
+                driverAccident.LastAccidentYear = 4;
+            }
+
+            conditionsForDocument.DriverAccident = driverAccident;
+
+            bool isClientHasPrivilegs;
+            bool parseIsClientHasPrivilegs = bool.TryParse(dataParsed.privilege.ToString(), out isClientHasPrivilegs);
+            if (!parseIsClientHasPrivilegs)
+            {
+                isClientHasPrivilegs = false;
+                responseToClient.responseType = ResponseType.Bad;
+                responseToClient.responseText = "Не вдалося отримати дані про Ваші пільги. " + defaultConfigMessage + " \"Відсутні\".";
+                warnings.Add(responseToClient);
+            }
+            conditionsForDocument.IsClientHasPrivilegs = isDriverWasInAccident;
+
+            int documentAdditionalLimits;
+            bool parseDocumentAdditionalLimits = int.TryParse(dataParsed.osagoLimits.ToString(), out documentAdditionalLimits);
+            if (!parseDocumentAdditionalLimits)
+            {
+                documentAdditionalLimits = 0;
+                responseToClient.responseType = ResponseType.Bad;
+                responseToClient.responseText = "Не вдалося отримати дані про Ваше бажання збільшити ліміти відповідальності. " + defaultConfigMessage + " \"Не збільшувати\".";
+                warnings.Add(responseToClient);
+            }
+            conditionsForDocument.DocumentAdditionalLimits = documentAdditionalLimits;
+
+            List<CompanyToSend> companiesToSend = new List<CompanyToSend>();
+
+            var companies = db.Company.Select(c => c.Name).ToList();
+            foreach(var c in companies)
+            {
+                CompanyToSend company= new CompanyToSend();
+                company.CompanyName = c;
+
+                companiesToSend.Add(company);
+            }
+
+            if(warnings.Count > 0)
+            {
+                DataWithWarningToSend dataWithWarningToSend = new DataWithWarningToSend();
+                dataWithWarningToSend.CompaniesToSend = companiesToSend;
+                dataWithWarningToSend.ErrorMessagesToClients = warnings;
+
+                return js.Serialize(dataWithWarningToSend);
+            }
+
+            return js.Serialize(companiesToSend);
+        }
+
+        private class DataWithWarningToSend
+        {
+            public List<CompanyToSend> CompaniesToSend { get; set; }
+            public List<ResponseToClient> ErrorMessagesToClients { get; set; }
+        }
+
+        private class CompanyToSend
+        {
+            public string CompanyName { get; set; }
+            //continue this class in next push
         }
 
         private dynamic GetPotsRequestBody()
@@ -127,8 +318,39 @@ namespace InsuranceServices.Controllers
 
         private class Transport
         {
-            public string Type { get; set; }
-            public string SubType { get; set; }
+            public CarGlobalType Type { get; set; }
+            public CarInsuranceType SubType { get; set; }
+        }
+
+        private class PlaceOfRegistration
+        {
+            public CityOfRegistration CityOfRegistration { get; set; }
+            public CountryOfRegistration CountryOfRegistration { get; set; }
+        }
+
+        private class PeriodOfDocument
+        {
+            public double Period { get; set; }
+            //Mandatory Technical Control (in rus OTK)
+            public bool isMTC { get; set; }
+        }
+
+        private class DriverAccident
+        {
+            public bool IsDriverWasInAccident { get; set; }
+            public int LastAccidentYear { get; set; }
+        }
+
+        private class ConditionsForDocument
+        {
+            public Transport Transport { get; set; }
+            public PlaceOfRegistration PlaceOfRegistration { get; set; }
+            public bool IsLegalEntity { get; set; }
+            public PeriodOfDocument PeriodOfDocument { get; set; }
+            public bool IsUseAsTaxi { get; set; }
+            public DriverAccident DriverAccident { get; set; }
+            public bool IsClientHasPrivilegs { get; set; }
+            public int DocumentAdditionalLimits { get; set; }
         }
 
         private class TSCToSend

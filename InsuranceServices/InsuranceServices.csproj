@@ -208,6 +208,7 @@
     <Content Include="Content\css\calc.css" />
     <Content Include="Content\css\loading.css" />
     <Content Include="Content\css\scaffolding.css" />
+    <Content Include="Content\img\back.svg" />
     <Content Include="Content\img\close.svg" />
     <Content Include="Content\img\crying.svg" />
     <Content Include="Content\img\icons.svg" />
@@ -237,7 +238,6 @@
     <Content Include="Scripts\3.app.js" />
     <Content Include="Scripts\build.js" />
     <Content Include="Scripts\loading.js" />
-    <Content Include="Scripts\scripts.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
