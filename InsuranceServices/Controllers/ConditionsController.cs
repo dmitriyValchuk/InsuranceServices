@@ -279,32 +279,22 @@ namespace InsuranceServices.Controllers
         }
 
         //private List<CompanyToSend> GetCompaniesForConditions(ConditionsForDocument conditionsForDocument)
-        private Dictionary<string, List<double>> GetCompaniesForConditions(ConditionsForDocument conditionsForDocument)
+        private List<CompanyToSend> GetCompaniesForConditions(ConditionsForDocument conditionsForDocument)
         {
+            List<CompanyToSend> companyToSends = new List<CompanyToSend>();
+
             List<Company> companies = db.Company.ToList();
-            Dictionary<string, List<double>> companiesM = new Dictionary<string, List<double>>();
-            foreach(var company in companies)
+            double baseCoef = 180.0;
+            //Dictionary<string, List<double>> companiesM = new Dictionary<string, List<double>>();
+            foreach (var company in companies)
             {
-                var a  = db.CompanyMiddleman.Where(cm => cm.Company.Name == company.Name).ToList();
                 List<int> companyMiddlemenId = db.CompanyMiddleman.Where(cm => cm.Company.Name == company.Name).Select(cm => cm.Id).ToList();
-                //companiesM.Add(company.Name, companyMiddlemen);
-                double baseCoef, K1, K2, K3, K4, K5, K6, K7, BM, KPark, KPilg;
-                List<double> K1Values = new List<double>();
-                foreach(var middlemanId in companyMiddlemenId)
+
+                double K1, K2, K3, K4, K5, K6, K7, BM, KPark, KPilg;
+                
+                foreach (var middlemanId in companyMiddlemenId)
                 {
-                    try
-                    {
-                        K1 = db.K1.Where(k => k.CompanyMiddleman.Id == middlemanId
-                                           && k.CarInsuranceType.Type == conditionsForDocument.Transport.SubType.Type)
-                                           .Select(k => k.Value).First();
-                        if (K1 == 0)
-                            continue;
-                    }
-                    catch
-                    {
-                        continue;
-                    }                    
-                    K1Values.Add(K1);
+                    CompanyToSend companyToSend = new CompanyToSend();
 
                     List<Franchise> franchises = new List<Franchise>();
                     try
@@ -317,19 +307,14 @@ namespace InsuranceServices.Controllers
                         continue;
                     }
 
+
                     try
                     {
-                        foreach (var f in franchises) {
-                            K2 = db.K2.Where(k => k.CompanyMiddleman.Id == middlemanId
-                                                && k.IdInsuranceZoneOfReg == conditionsForDocument.InsuranceZoneOfRegistration.Id
-                                                && k.IsLegalEntity == conditionsForDocument.IsLegalEntity
-                                                && k.CarInsuranceType.Type == conditionsForDocument.Transport.SubType.Type
-                                                && k.ContractFranchise.Franchise.Sum == f.Sum)
-                                                .Select(k => k.Value).First();
-
-                            if (K2 == 0)
-                                continue;
-                        }
+                        K1 = db.K1.Where(k => k.CompanyMiddleman.Id == middlemanId
+                                           && k.CarInsuranceType.Type == conditionsForDocument.Transport.SubType.Type)
+                                           .Select(k => k.Value).First();
+                        if (K1 == 0)
+                            continue;
                     }
                     catch
                     {
@@ -345,25 +330,6 @@ namespace InsuranceServices.Controllers
                                             .Select(k => k.Value).First();
                         if (K3 == 0)
                             continue;
-                    }
-                    catch
-                    {
-                        continue;
-                    }
-
-                    try
-                    {
-                        foreach (var f in franchises)
-                        {
-                            K4 = db.K4.Where(k => k.CompanyMiddleman.Id == middlemanId
-                                           && k.IdInsuranceZoneOfReg == conditionsForDocument.InsuranceZoneOfRegistration.Id
-                                           && k.ContractFranchise.Franchise.Sum == f.Sum
-                                           && k.IsLegalEntity == conditionsForDocument.IsLegalEntity)
-                                           .Select(k => k.Value).First();
-
-                            if (K4 == 0)
-                                continue;
-                        }
                     }
                     catch
                     {
@@ -411,25 +377,6 @@ namespace InsuranceServices.Controllers
 
                     try
                     {
-                        foreach (var f in franchises)
-                        {
-                            BM = db.BonusMalus.Where(bm => bm.IdCompanyMiddleman == middlemanId
-                                                        && bm.IdInsuranceZoneOfReg == conditionsForDocument.InsuranceZoneOfRegistration.Id
-                                                        && bm.ContractFranchise.Franchise.Sum == f.Sum
-                                                        && bm.IsLegalEntity == conditionsForDocument.IsLegalEntity
-                                                        && bm.CarInsuranceType.Type == conditionsForDocument.Transport.SubType.Type)
-                                                        .Select(bm => bm.Value).First();
-                            if (BM == 0)
-                                continue;
-                        }
-                    }
-                    catch
-                    {
-                        continue;
-                    }
-
-                    try
-                    {
                         //in future will be add field in conditionsForDocument and it will be same "TransportCount"
                         int transportCount = 1;
                         //
@@ -456,15 +403,110 @@ namespace InsuranceServices.Controllers
                     {
                         continue;
                     }
+
                     
-                }
-                if (K1Values.Count == 0)
-                    continue;
 
+                    foreach (var f in franchises)
+                    {
+                        try
+                        {
+                            var a = db.K2.Where(k => k.CompanyMiddleman.Id == middlemanId
+                                                && k.IdInsuranceZoneOfReg == conditionsForDocument.InsuranceZoneOfRegistration.Id
+                                                && k.IsLegalEntity == conditionsForDocument.IsLegalEntity
+                                                && k.CarInsuranceType.Type == conditionsForDocument.Transport.SubType.Type
+                                                && k.ContractFranchise.Franchise.Sum == f.Sum)
+                                                .Select(k => k.Value).First();
 
-                companiesM.Add(company.Name, K1Values);
+                            K2 = db.K2.Where(k => k.CompanyMiddleman.Id == middlemanId
+                                                && k.IdInsuranceZoneOfReg == conditionsForDocument.InsuranceZoneOfRegistration.Id
+                                                && k.IsLegalEntity == conditionsForDocument.IsLegalEntity
+                                                && k.CarInsuranceType.Type == conditionsForDocument.Transport.SubType.Type
+                                                && k.ContractFranchise.Franchise.Sum == f.Sum)
+                                                .Select(k => k.Value).First();
+
+                            if (K2 == 0)
+                                continue;
+                        }
+                        catch
+                        {
+                            continue;
+                        }                        
+
+                        try
+                        {
+                            K4 = db.K4.Where(k => k.CompanyMiddleman.Id == middlemanId
+                                            && k.IdInsuranceZoneOfReg == conditionsForDocument.InsuranceZoneOfRegistration.Id
+                                            && k.ContractFranchise.Franchise.Sum == f.Sum
+                                            && k.IsLegalEntity == conditionsForDocument.IsLegalEntity)
+                                            .Select(k => k.Value).First();
+
+                            if (K4 == 0)
+                                continue;
+                        }
+                        catch
+                        {
+                            continue;
+                        }                        
+
+                        try
+                        {
+                            BM = db.BonusMalus.Where(bm => bm.IdCompanyMiddleman == middlemanId
+                                                        && bm.IdInsuranceZoneOfReg == conditionsForDocument.InsuranceZoneOfRegistration.Id
+                                                        && bm.ContractFranchise.Franchise.Sum == f.Sum
+                                                        && bm.IsLegalEntity == conditionsForDocument.IsLegalEntity
+                                                        && bm.CarInsuranceType.Type == conditionsForDocument.Transport.SubType.Type)
+                                                        .Select(bm => bm.Value).First();
+                            if (BM == 0)
+                                continue;
+                        }
+                        catch
+                        {
+                            continue;
+                        }                        
+
+                        CompanyDetail companyDetail = new CompanyDetail();
+                        try
+                        {
+                            companyDetail = db.CompanyDetail.Where(cd => cd.IdCompany == company.Id).First();
+                        }
+                        catch
+                        {
+                            continue;
+                        }
+
+                        companyToSend.CompanyName = company.Name;
+                        companyToSend.CompanyRate = 90;//companyDetail.SummaryRait;
+
+                        //var companyFeaturesToCompany = db.CompanyFeatureToCompany.Where(cftc => cftc.IdCompany == company.Id).ToList();
+                        //List<CompanyFeature> features = new List<CompanyFeature>();
+                        //foreach(var cftc in companyFeaturesToCompany)
+                        //{
+                        //    CompanyFeature companyFeature = new CompanyFeature();
+                        //    companyFeature.Title = cftc.CompanyFeature.Name;
+                        //    companyFeature.IconPath = cftc.CompanyFeature.Icon;
+
+                        //    features.Add(companyFeature);
+                        //}
+                        companyToSend.CompanyFeatures = null;//features;
+
+                        companyToSend.Franchise = f.Sum;
+                        companyToSend.FullPrice = baseCoef * K1 * K2 * K3 * K4 * K5 * K6 * K7 * KPark * KPilg;
+                        //temp row, in resent feature need to add DiscountForClient in DB
+                        companyToSend.DiscountPrice = Math.Ceiling(companyToSend.FullPrice * 0.9);
+
+                        //temp row, in feature need to add in ImageType field "Type" {1, 2, 3 . . .} and field "Name" will be {small, middle, large . . . } 
+                        //CompanyIMG companyIMG = db.CompanyIMG.Where(ci => ci.IdCompany == company.Id && ci.ImageType.Name == "1").First();
+                        //companyToSend.ImgPath = companyIMG.Path;
+                        //companyToSend.ImageSize = companyIMG.ImageType.Name;
+                        //companyToSend.PageCompanyInfoPath = companyIMG.ReferensToCompanyPage;
+
+                        companyToSends.Add(companyToSend);
+                    }
+                    if (franchises == null || franchises.Count == 0)
+                        continue;
+                }           
             }
-            return companiesM;
+            return companyToSends;
         }
 
         private class DataWithWarningToSend
@@ -485,11 +527,11 @@ namespace InsuranceServices.Controllers
             public string CompanyName { get; set; }
             public int CompanyRate { get; set; }
             public List<CompanyFeature> CompanyFeatures { get; set; }
-            public List<int> Franchise { get; set; }
+            public double Franchise { get; set; }
             public double FullPrice { get; set; }
-            public int DiscountPrice { get; set; }
+            public double DiscountPrice { get; set; }
             public string ImgPath { get; set; }
-            public int ImageSize { get; set; }
+            public string ImageSize { get; set; }
             public string PageCompanyInfoPath { get; set; }
         }
 

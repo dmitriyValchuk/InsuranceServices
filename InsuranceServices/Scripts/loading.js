@@ -1,10 +1,10 @@
-showLoading("Загружаем калькулятор");
+showLoading("Завантаження калькурятора");
 
 function showLoading(text) {
-	const loadingText = document.querySelector(".loading--text");
+	const loadingText = document.querySelector(".start-loading--text");
 	loadingText.textContent = text;
 	document.addEventListener('DOMContentLoaded', function() {
-			const loading = document.querySelector(".loading");
-			loading.classList.add("loading__disabled");
+			const loading = document.querySelector(".start-loading");
+			loading.classList.add("start-loading__disabled");
 		});
 }
