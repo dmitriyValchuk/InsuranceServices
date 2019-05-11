@@ -130,18 +130,20 @@ namespace InsuranceServices.Controllers
                 return js.Serialize(responseToClient);
             }
 
-            PlaceOfRegistration placeOfRegistration = new PlaceOfRegistration();
-            CityOfRegistration cityOfRegistration = new CityOfRegistration();
-            CountryOfRegistration countryOfRegistration = new CountryOfRegistration();
+            //PlaceOfRegistration placeOfRegistration = new PlaceOfRegistration();
+            //CityOfRegistration cityOfRegistration = new CityOfRegistration();
+            //CountryOfRegistration countryOfRegistration = new CountryOfRegistration();
 
-            GetPlaceOfRegistration(dataParsed, ref cityOfRegistration, ref countryOfRegistration);
+            //GetPlaceOfRegistration(dataParsed, ref cityOfRegistration, ref countryOfRegistration);
 
-            placeOfRegistration.CityOfRegistration = cityOfRegistration;
-            placeOfRegistration.CountryOfRegistration = countryOfRegistration;
+            //placeOfRegistration.CityOfRegistration = cityOfRegistration;
+            //placeOfRegistration.CountryOfRegistration = countryOfRegistration;
 
-            conditionsForDocument.PlaceOfRegistration = placeOfRegistration;
+            //conditionsForDocument.PlaceOfRegistration = placeOfRegistration;
+
+            conditionsForDocument.InsuranceZoneOfRegistration = GetZoneOfRegistration(dataParsed);
             
-            if(placeOfRegistration.CityOfRegistration == null && placeOfRegistration.CountryOfRegistration == null)
+            if(conditionsForDocument.InsuranceZoneOfRegistration == null)
             {
                 responseToClient.responseType = ResponseType.Critical;
                 responseToClient.responseText = "Виникла проблема з місцем реєстрації Вашого авто. Будь ласка поверніться на попередню сторінку та змініть місце реєстрації автомобіля";
@@ -250,6 +252,7 @@ namespace InsuranceServices.Controllers
             }
             conditionsForDocument.DocumentAdditionalLimits = documentAdditionalLimits;
 
+            //Test Data
             List<CompanyToSend> companiesToSend = new List<CompanyToSend>();
 
             var companies = db.Company.Select(c => c.Name).ToList();
@@ -269,8 +272,199 @@ namespace InsuranceServices.Controllers
 
                 return js.Serialize(dataWithWarningToSend);
             }
-
+            //Test Data End
+            var test = GetCompaniesForConditions(conditionsForDocument);
+            return js.Serialize(test);
             return js.Serialize(companiesToSend);
+        }
+
+        //private List<CompanyToSend> GetCompaniesForConditions(ConditionsForDocument conditionsForDocument)
+        private Dictionary<string, List<double>> GetCompaniesForConditions(ConditionsForDocument conditionsForDocument)
+        {
+            List<Company> companies = db.Company.ToList();
+            Dictionary<string, List<double>> companiesM = new Dictionary<string, List<double>>();
+            foreach(var company in companies)
+            {
+                var a  = db.CompanyMiddleman.Where(cm => cm.Company.Name == company.Name).ToList();
+                List<int> companyMiddlemenId = db.CompanyMiddleman.Where(cm => cm.Company.Name == company.Name).Select(cm => cm.Id).ToList();
+                //companiesM.Add(company.Name, companyMiddlemen);
+                double baseCoef, K1, K2, K3, K4, K5, K6, K7, BM, KPark, KPilg;
+                List<double> K1Values = new List<double>();
+                foreach(var middlemanId in companyMiddlemenId)
+                {
+                    try
+                    {
+                        K1 = db.K1.Where(k => k.CompanyMiddleman.Id == middlemanId
+                                           && k.CarInsuranceType.Type == conditionsForDocument.Transport.SubType.Type)
+                                           .Select(k => k.Value).First();
+                        if (K1 == 0)
+                            continue;
+                    }
+                    catch
+                    {
+                        continue;
+                    }                    
+                    K1Values.Add(K1);
+
+                    List<Franchise> franchises = new List<Franchise>();
+                    try
+                    {
+                        franchises = db.ContractFranchise.Where(cf => cf.CompanyContractTypes.ContractType.Name == "ГО"
+                                                                       && cf.CompanyContractTypes.CompanyMiddleman.Id == middlemanId).Select(cf => cf.Franchise).ToList();
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        foreach (var f in franchises) {
+                            K2 = db.K2.Where(k => k.CompanyMiddleman.Id == middlemanId
+                                                && k.IdInsuranceZoneOfReg == conditionsForDocument.InsuranceZoneOfRegistration.Id
+                                                && k.IsLegalEntity == conditionsForDocument.IsLegalEntity
+                                                && k.CarInsuranceType.Type == conditionsForDocument.Transport.SubType.Type
+                                                && k.ContractFranchise.Franchise.Sum == f.Sum)
+                                                .Select(k => k.Value).First();
+
+                            if (K2 == 0)
+                                continue;
+                        }
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        K3 = db.K3.Where(k => k.CompanyMiddleman.Id == middlemanId
+                                            && k.IdInsuranceZoneOfReg == conditionsForDocument.InsuranceZoneOfRegistration.Id
+                                            && k.IsLegalEntity == conditionsForDocument.IsLegalEntity
+                                            && k.CarInsuranceType.Type == conditionsForDocument.Transport.SubType.Type)
+                                            .Select(k => k.Value).First();
+                        if (K3 == 0)
+                            continue;
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        foreach (var f in franchises)
+                        {
+                            K4 = db.K4.Where(k => k.CompanyMiddleman.Id == middlemanId
+                                           && k.IdInsuranceZoneOfReg == conditionsForDocument.InsuranceZoneOfRegistration.Id
+                                           && k.ContractFranchise.Franchise.Sum == f.Sum
+                                           && k.IsLegalEntity == conditionsForDocument.IsLegalEntity)
+                                           .Select(k => k.Value).First();
+
+                            if (K4 == 0)
+                                continue;
+                        }
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        if (conditionsForDocument.InsuranceZoneOfRegistration.Name == "Зона 7" || conditionsForDocument.PeriodOfDocument.isMTC)
+                            K5 = 1.0;
+                        else
+                            K5 = db.K5.Where(k => k.Period == conditionsForDocument.PeriodOfDocument.Period).Select(k => k.Value).First();
+
+                        if (K5 == 0)
+                            continue;
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        K6 = (double)db.K6.Where(k => k.IsCheater == false).Select(k => k.Value).First();
+
+                        if (K6 == 0)
+                            K6 = 1.0;
+                    }
+                    catch
+                    {
+                        K6 = 1.0;
+                    }
+
+                    try
+                    {
+                        if (K6 != 1.0)
+                            K7 = db.K7.Where(k => k.Period == conditionsForDocument.PeriodOfDocument.Period).Select(k => k.Value).First();
+                        else
+                            K7 = 1.0;
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        foreach (var f in franchises)
+                        {
+                            BM = db.BonusMalus.Where(bm => bm.IdCompanyMiddleman == middlemanId
+                                                        && bm.IdInsuranceZoneOfReg == conditionsForDocument.InsuranceZoneOfRegistration.Id
+                                                        && bm.ContractFranchise.Franchise.Sum == f.Sum
+                                                        && bm.IsLegalEntity == conditionsForDocument.IsLegalEntity
+                                                        && bm.CarInsuranceType.Type == conditionsForDocument.Transport.SubType.Type)
+                                                        .Select(bm => bm.Value).First();
+                            if (BM == 0)
+                                continue;
+                        }
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        //in future will be add field in conditionsForDocument and it will be same "TransportCount"
+                        int transportCount = 1;
+                        //
+                        if (!conditionsForDocument.IsLegalEntity)
+                            KPark = 1.0;
+                        else
+                            KPark = db.DiscountByQuantity.Where(d => transportCount >= d.TransportCountFrom
+                                                                  && transportCount <= d.TransportCountTo)
+                                                                  .Select(d => d.Value).First();
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        if (!conditionsForDocument.IsClientHasPrivilegs)
+                            KPilg = 1.0;
+                        else
+                            KPilg = 0.5;
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                    
+                }
+                if (K1Values.Count == 0)
+                    continue;
+
+
+                companiesM.Add(company.Name, K1Values);
+            }
+            return companiesM;
         }
 
         private class DataWithWarningToSend
@@ -279,10 +473,24 @@ namespace InsuranceServices.Controllers
             public List<ResponseToClient> ErrorMessagesToClients { get; set; }
         }
 
-        private class CompanyToSend
+
+        public class CompanyFeature
+        {
+            public string Title { get; set; }
+            public string IconPath { get; set; }
+        }
+
+        public class CompanyToSend
         {
             public string CompanyName { get; set; }
-            //continue this class in next push
+            public int CompanyRate { get; set; }
+            public List<CompanyFeature> CompanyFeatures { get; set; }
+            public List<int> Franchise { get; set; }
+            public double FullPrice { get; set; }
+            public int DiscountPrice { get; set; }
+            public string ImgPath { get; set; }
+            public int ImageSize { get; set; }
+            public string PageCompanyInfoPath { get; set; }
         }
 
         private dynamic GetPotsRequestBody()
@@ -293,58 +501,65 @@ namespace InsuranceServices.Controllers
             return JsonConvert.DeserializeObject(bodyData);
         }
 
-        private void GetPlaceOfRegistration(dynamic dataParsed, ref CityOfRegistration cityOfRegistration, ref CountryOfRegistration countryOfRegistration)
+        //private void GetPlaceOfRegistration(dynamic dataParsed, ref CityOfRegistration cityOfRegistration, ref CountryOfRegistration countryOfRegistration)
+        private InsuranceZoneOfRegistration GetZoneOfRegistration(dynamic dataParsed)
         {
             if (dataParsed.place.placeType == "code")
             {
                 int currentCode = Convert.ToInt32(dataParsed.place.code.codeNum);
                 TSC tsc = db.TSC.Where(t => t.Code == currentCode).First();
-                cityOfRegistration = tsc.CityOfRegistration;
+                //cityOfRegistration = tsc.CityOfRegistration;
+                return tsc.CityOfRegistration.InsuranceZoneOfRegistration;
             }
             if (dataParsed.place.placeType == "address")
             {
                 if (dataParsed.place.foreign == "false")
                 {
                     string currentCity = Convert.ToString(dataParsed.place.city);
-                    cityOfRegistration = db.CityOfRegistration.Where(c => c.Name == currentCity).First();
+                    //cityOfRegistration = db.CityOfRegistration.Where(c => c.Name == currentCity).First();
+                    return db.CityOfRegistration.Where(c => c.Name == currentCity).Select(c => c.InsuranceZoneOfRegistration).First();
                 }
                 else
                 {
                     string currentCountry = Convert.ToString(dataParsed.place.foreign);
-                    countryOfRegistration = db.CountryOfRegistration.Where(c => c.Name == currentCountry).First();
+                    //countryOfRegistration = db.CountryOfRegistration.Where(c => c.Name == currentCountry).First();
+                    return db.CountryOfRegistration.Where(c => c.Name == currentCountry).Select(c => c.InsuranceZoneOfRegistration).First();
                 }
             }
+
+            return null;
         }
 
-        private class Transport
+        public class Transport
         {
             public CarGlobalType Type { get; set; }
             public CarInsuranceType SubType { get; set; }
         }
 
-        private class PlaceOfRegistration
-        {
-            public CityOfRegistration CityOfRegistration { get; set; }
-            public CountryOfRegistration CountryOfRegistration { get; set; }
-        }
+        //public class PlaceOfRegistration
+        //{
+        //    public CityOfRegistration CityOfRegistration { get; set; }
+        //    public CountryOfRegistration CountryOfRegistration { get; set; }
+        //}
 
-        private class PeriodOfDocument
+        public class PeriodOfDocument
         {
             public double Period { get; set; }
             //Mandatory Technical Control (in rus OTK)
             public bool isMTC { get; set; }
         }
 
-        private class DriverAccident
+        public class DriverAccident
         {
             public bool IsDriverWasInAccident { get; set; }
             public int LastAccidentYear { get; set; }
         }
 
-        private class ConditionsForDocument
+        public class ConditionsForDocument
         {
             public Transport Transport { get; set; }
-            public PlaceOfRegistration PlaceOfRegistration { get; set; }
+            //public PlaceOfRegistration PlaceOfRegistration { get; set; }
+            public InsuranceZoneOfRegistration InsuranceZoneOfRegistration { get; set; }
             public bool IsLegalEntity { get; set; }
             public PeriodOfDocument PeriodOfDocument { get; set; }
             public bool IsUseAsTaxi { get; set; }
