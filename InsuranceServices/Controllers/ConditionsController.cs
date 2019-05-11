@@ -290,7 +290,7 @@ namespace InsuranceServices.Controllers
             {
                 List<int> companyMiddlemenId = db.CompanyMiddleman.Where(cm => cm.Company.Name == company.Name).Select(cm => cm.Id).ToList();
 
-                double K1, K2, K3, K4, K5, K6, K7, BM, KPark, KPilg;
+                double K1Value, K2Value, K3Value, K4Value, K5Value, K6Value, K7Value, BMValue, KParkValue, KPilgValue;
                 
                 foreach (var middlemanId in companyMiddlemenId)
                 {
@@ -310,10 +310,10 @@ namespace InsuranceServices.Controllers
 
                     try
                     {
-                        K1 = db.K1.Where(k => k.CompanyMiddleman.Id == middlemanId
+                        K1Value = db.K1.Where(k => k.CompanyMiddleman.Id == middlemanId
                                            && k.CarInsuranceType.Type == conditionsForDocument.Transport.SubType.Type)
                                            .Select(k => k.Value).First();
-                        if (K1 == 0)
+                        if (K1Value == 0)
                             continue;
                     }
                     catch
@@ -323,12 +323,12 @@ namespace InsuranceServices.Controllers
 
                     try
                     {
-                        K3 = db.K3.Where(k => k.CompanyMiddleman.Id == middlemanId
+                        K3Value = db.K3.Where(k => k.CompanyMiddleman.Id == middlemanId
                                             && k.IdInsuranceZoneOfReg == conditionsForDocument.InsuranceZoneOfRegistration.Id
                                             && k.IsLegalEntity == conditionsForDocument.IsLegalEntity
                                             && k.CarInsuranceType.Type == conditionsForDocument.Transport.SubType.Type)
                                             .Select(k => k.Value).First();
-                        if (K3 == 0)
+                        if (K3Value == 0)
                             continue;
                     }
                     catch
@@ -339,11 +339,11 @@ namespace InsuranceServices.Controllers
                     try
                     {
                         if (conditionsForDocument.InsuranceZoneOfRegistration.Name == "Зона 7" || conditionsForDocument.PeriodOfDocument.isMTC)
-                            K5 = 1.0;
+                            K5Value = 1.0;
                         else
-                            K5 = db.K5.Where(k => k.Period == conditionsForDocument.PeriodOfDocument.Period).Select(k => k.Value).First();
+                            K5Value = db.K5.Where(k => k.Period == conditionsForDocument.PeriodOfDocument.Period).Select(k => k.Value).First();
 
-                        if (K5 == 0)
+                        if (K5Value == 0)
                             continue;
                     }
                     catch
@@ -353,22 +353,22 @@ namespace InsuranceServices.Controllers
 
                     try
                     {
-                        K6 = (double)db.K6.Where(k => k.IsCheater == false).Select(k => k.Value).First();
+                        K6Value = (double)db.K6.Where(k => k.IsCheater == false).Select(k => k.Value).First();
 
-                        if (K6 == 0)
-                            K6 = 1.0;
+                        if (K6Value == 0)
+                            K6Value = 1.0;
                     }
                     catch
                     {
-                        K6 = 1.0;
+                        K6Value = 1.0;
                     }
 
                     try
                     {
-                        if (K6 != 1.0)
-                            K7 = db.K7.Where(k => k.Period == conditionsForDocument.PeriodOfDocument.Period).Select(k => k.Value).First();
+                        if (K6Value != 1.0)
+                            K7Value = db.K7.Where(k => k.Period == conditionsForDocument.PeriodOfDocument.Period).Select(k => k.Value).First();
                         else
-                            K7 = 1.0;
+                            K7Value = 1.0;
                     }
                     catch
                     {
@@ -381,9 +381,9 @@ namespace InsuranceServices.Controllers
                         int transportCount = 1;
                         //
                         if (!conditionsForDocument.IsLegalEntity)
-                            KPark = 1.0;
+                            KParkValue = 1.0;
                         else
-                            KPark = db.DiscountByQuantity.Where(d => transportCount >= d.TransportCountFrom
+                            KParkValue = db.DiscountByQuantity.Where(d => transportCount >= d.TransportCountFrom
                                                                   && transportCount <= d.TransportCountTo)
                                                                   .Select(d => d.Value).First();
                     }
@@ -395,9 +395,9 @@ namespace InsuranceServices.Controllers
                     try
                     {
                         if (!conditionsForDocument.IsClientHasPrivilegs)
-                            KPilg = 1.0;
+                            KPilgValue = 1.0;
                         else
-                            KPilg = 0.5;
+                            KPilgValue = 0.5;
                     }
                     catch
                     {
@@ -410,21 +410,16 @@ namespace InsuranceServices.Controllers
                     {
                         try
                         {
-                            var a = db.K2.Where(k => k.CompanyMiddleman.Id == middlemanId
+
+
+                            K2Value = db.K2.Where(k => k.CompanyMiddleman.Id == middlemanId
                                                 && k.IdInsuranceZoneOfReg == conditionsForDocument.InsuranceZoneOfRegistration.Id
                                                 && k.IsLegalEntity == conditionsForDocument.IsLegalEntity
                                                 && k.CarInsuranceType.Type == conditionsForDocument.Transport.SubType.Type
                                                 && k.ContractFranchise.Franchise.Sum == f.Sum)
                                                 .Select(k => k.Value).First();
 
-                            K2 = db.K2.Where(k => k.CompanyMiddleman.Id == middlemanId
-                                                && k.IdInsuranceZoneOfReg == conditionsForDocument.InsuranceZoneOfRegistration.Id
-                                                && k.IsLegalEntity == conditionsForDocument.IsLegalEntity
-                                                && k.CarInsuranceType.Type == conditionsForDocument.Transport.SubType.Type
-                                                && k.ContractFranchise.Franchise.Sum == f.Sum)
-                                                .Select(k => k.Value).First();
-
-                            if (K2 == 0)
+                            if (K2Value == 0)
                                 continue;
                         }
                         catch
@@ -434,13 +429,13 @@ namespace InsuranceServices.Controllers
 
                         try
                         {
-                            K4 = db.K4.Where(k => k.CompanyMiddleman.Id == middlemanId
+                            K4Value = db.K4.Where(k => k.CompanyMiddleman.Id == middlemanId
                                             && k.IdInsuranceZoneOfReg == conditionsForDocument.InsuranceZoneOfRegistration.Id
                                             && k.ContractFranchise.Franchise.Sum == f.Sum
                                             && k.IsLegalEntity == conditionsForDocument.IsLegalEntity)
                                             .Select(k => k.Value).First();
 
-                            if (K4 == 0)
+                            if (K4Value == 0)
                                 continue;
                         }
                         catch
@@ -450,13 +445,13 @@ namespace InsuranceServices.Controllers
 
                         try
                         {
-                            BM = db.BonusMalus.Where(bm => bm.IdCompanyMiddleman == middlemanId
+                            BMValue = db.BonusMalus.Where(bm => bm.IdCompanyMiddleman == middlemanId
                                                         && bm.IdInsuranceZoneOfReg == conditionsForDocument.InsuranceZoneOfRegistration.Id
                                                         && bm.ContractFranchise.Franchise.Sum == f.Sum
                                                         && bm.IsLegalEntity == conditionsForDocument.IsLegalEntity
                                                         && bm.CarInsuranceType.Type == conditionsForDocument.Transport.SubType.Type)
                                                         .Select(bm => bm.Value).First();
-                            if (BM == 0)
+                            if (BMValue == 0)
                                 continue;
                         }
                         catch
@@ -490,7 +485,7 @@ namespace InsuranceServices.Controllers
                         companyToSend.CompanyFeatures = null;//features;
 
                         companyToSend.Franchise = f.Sum;
-                        companyToSend.FullPrice = baseCoef * K1 * K2 * K3 * K4 * K5 * K6 * K7 * KPark * KPilg;
+                        companyToSend.FullPrice = baseCoef * K1Value * K2Value * K3Value * K4Value * K5Value * K6Value * K7Value * KParkValue * KPilgValue;
                         //temp row, in resent feature need to add DiscountForClient in DB
                         companyToSend.DiscountPrice = Math.Ceiling(companyToSend.FullPrice * 0.9);
 
