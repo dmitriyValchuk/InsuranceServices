@@ -294,7 +294,7 @@ namespace InsuranceServices.Controllers
                 
                 foreach (var middlemanId in companyMiddlemenId)
                 {
-                    CompanyToSend companyToSend = new CompanyToSend();
+                    //CompanyToSend companyToSend = new CompanyToSend();
 
                     List<Franchise> franchises = new List<Franchise>();
                     try
@@ -408,10 +408,9 @@ namespace InsuranceServices.Controllers
 
                     foreach (var f in franchises)
                     {
+                        CompanyToSend companyToSend = new CompanyToSend();
                         try
                         {
-
-
                             K2Value = db.K2.Where(k => k.CompanyMiddleman.Id == middlemanId
                                                 && k.IdInsuranceZoneOfReg == conditionsForDocument.InsuranceZoneOfRegistration.Id
                                                 && k.IsLegalEntity == conditionsForDocument.IsLegalEntity
@@ -459,15 +458,15 @@ namespace InsuranceServices.Controllers
                             continue;
                         }                        
 
-                        CompanyDetail companyDetail = new CompanyDetail();
-                        try
-                        {
-                            companyDetail = db.CompanyDetail.Where(cd => cd.IdCompany == company.Id).First();
-                        }
-                        catch
-                        {
-                            continue;
-                        }
+                        //CompanyDetail companyDetail = new CompanyDetail();
+                        //try
+                        //{
+                        //    companyDetail = db.CompanyDetail.Where(cd => cd.IdCompany == company.Id).First();
+                        //}
+                        //catch
+                        //{
+                        //    continue;
+                        //}
 
                         companyToSend.CompanyName = company.Name;
                         companyToSend.CompanyRate = 90;//companyDetail.SummaryRait;
