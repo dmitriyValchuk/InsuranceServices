@@ -484,7 +484,8 @@ namespace InsuranceServices.Controllers
                         companyToSend.CompanyFeatures = null;//features;
 
                         companyToSend.Franchise = f.Sum;
-                        companyToSend.FullPrice = baseCoef * K1Value * K2Value * K3Value * K4Value * K5Value * K6Value * K7Value * KParkValue * KPilgValue;
+                        double tempPrice = baseCoef * K1Value * K2Value * K3Value * K4Value * K5Value * K6Value * K7Value * BMValue * KParkValue * KPilgValue;
+                        companyToSend.FullPrice = Math.Round(tempPrice, 0);
                         //temp row, in resent feature need to add DiscountForClient in DB
                         companyToSend.DiscountPrice = Math.Ceiling(companyToSend.FullPrice * 0.9);
 
