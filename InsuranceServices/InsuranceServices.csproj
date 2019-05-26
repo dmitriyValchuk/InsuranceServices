@@ -188,6 +188,7 @@
     <Compile Include="Models\DocumentType.cs" />
     <Compile Include="Models\Franchise.cs" />
     <Compile Include="Models\ImageType.cs" />
+    <Compile Include="Models\IndividualClient.cs" />
     <Compile Include="Models\InsuranceServicesContext.cs" />
     <Compile Include="Models\InsuranceZoneOfRegistration.cs" />
     <Compile Include="Models\K1.cs" />
@@ -197,6 +198,7 @@
     <Compile Include="Models\K5.cs" />
     <Compile Include="Models\K6.cs" />
     <Compile Include="Models\K7.cs" />
+    <Compile Include="Models\LegalEntityClient.cs" />
     <Compile Include="Models\Middleman.cs" />
     <Compile Include="Models\Privileges.cs" />
     <Compile Include="Models\RegioneOfRegistration.cs" />
@@ -265,6 +267,9 @@
     <Content Include="Scripts\2.app.js.map" />
     <Content Include="Scripts\3.app.js.map" />
     <Content Include="Scripts\build.js.map" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

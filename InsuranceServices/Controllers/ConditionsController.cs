@@ -504,6 +504,107 @@ namespace InsuranceServices.Controllers
             return companyToSends;
         }
 
+        [HttpPost]
+        public string CreateContracts()
+        {
+            JavaScriptSerializer js = new JavaScriptSerializer();
+            ResponseToClient responseToClient = new ResponseToClient();
+
+
+            string defaultErrorMessage = "Будь ласка скористайтеся сервісом пізніше. Дякуємо за розуміння.";
+
+            dynamic dataParsed = GetPotsRequestBody();
+            if(dataParsed == null)
+            {
+                responseToClient.responseType = ResponseType.Critical;
+                responseToClient.responseText = "Виникла помилка з обробкою Ваших даних. " + defaultErrorMessage;
+                return js.Serialize(responseToClient);
+            }
+
+            ContractForGeneration contractForGeneration = new ContractForGeneration();
+
+            //waith while from front will be get this field
+            int idCompanyMiddleman = dataParsed.idCompanyMiddlemanl;
+            int companyCode = db.CompanyMiddleman.Where(cm => cm.Id == idCompanyMiddleman).Select(cm => cm.Company.Code).FirstOrDefault();
+            contractForGeneration.CompanyCode = '0' + companyCode.ToString();
+            DateTime dateFrom = dataParsed.termFrom;
+            DateTime dateTo = dataParsed.termTo;
+            double franchise = Convert.ToDouble(dataParsed.frans);
+            contractForGeneration.TermFrom = dateFrom;
+            contractForGeneration.TermTo = dateTo;
+            contractForGeneration.Franchise = franchise;
+
+            //Add checking if client exist
+            Client client = new Client();
+            client.IsLegalEntity = dataParsed.personalData.isLegalEntity;
+            client.Phone = dataParsed.personalData.phone;
+            client.Address = dataParsed.region + ",\n" + dataParsed.city + ",\n" + dataParsed.street + ", " + dataParsed.house + ", " + dataParsed.flat;
+            db.Client.Add(client);
+            db.SaveChanges();
+
+            contractForGeneration.Phone = client.Phone;
+            contractForGeneration.Address = client.Address;
+
+            int idClient = db.Client.Where(c => c.Phone == client.Phone && c.Address == client.Address).Select(c => c.Id).FirstOrDefault();
+            if (client.IsLegalEntity)
+            {
+                LegalEntityClient legalEntityClient = new LegalEntityClient();
+                legalEntityClient.Name = dataParsed.personalData.companyName;
+                legalEntityClient.EDRPOU = dataParsed.personalData.egrpou;
+                legalEntityClient.IdClient = idClient;
+                db.LegalEntityClient.Add(legalEntityClient);
+                db.SaveChanges();
+            }
+            else
+            {
+                IndividualClient individualClient = new IndividualClient();
+                individualClient.Name = dataParsed.personalData.name;
+                individualClient.Surname = dataParsed.personalData.surname;
+                try
+                {
+                    individualClient.FatherName = dataParsed.personalData.patronymic;
+                }
+                catch
+                {
+                    individualClient.FatherName = "";
+                }
+                individualClient.DateOfBirth = dataParsed.personalData.dateOfBirth;
+                individualClient.PersonalCode = dataParsed.personalData.inn;
+                db.IndividualClient.Add(individualClient);
+                db.SaveChanges();
+            }
+
+            if (client.IsLegalEntity)
+            {
+                LegalEntityClient legalEntityClient = db.LegalEntityClient.Where(lec => lec.IdClient == idClient).FirstOrDefault();
+                contractForGeneration.ClientName = legalEntityClient.Name;
+                contractForGeneration.EDRPOU = legalEntityClient.EDRPOU;
+            }
+            else
+            {
+                IndividualClient individualClient = db.IndividualClient.Where(ic => ic.IdClient == idClient).FirstOrDefault();
+                contractForGeneration.ClientName = individualClient.Name;
+                contractForGeneration.ClientSurname = individualClient.Surname;
+                contractForGeneration.ClientFathername = individualClient.FatherName;
+                contractForGeneration.PersonalCode = individualClient.PersonalCode;
+                contractForGeneration.DateOfBirth = individualClient.DateOfBirth;
+            }
+
+            contractForGeneration.DocumentType = dataParsed.documents.type;
+            contractForGeneration.DocumentNumber = dataParsed.documents.number;
+            contractForGeneration.DateOfIssued = dataParsed.documents.when;
+
+            if(dataParsed.documents.type != "id-card")
+            {
+                contractForGeneration.DocumentSeria = dataParsed.documents.lot;
+                contractForGeneration.IssuedBy = dataParsed.documents.issuedBy;
+            }
+
+            contractForGeneration.PlaceOfRegistration = GetPlaceOfReg(dataParsed);
+            
+            return null;
+        }
+
         private class DataWithWarningToSend
         {
             public List<CompanyToSend> CompaniesToSend { get; set; }
@@ -520,6 +621,7 @@ namespace InsuranceServices.Controllers
         public class CompanyToSend
         {
             public string CompanyName { get; set; }
+            public int IdCompanyMiddleman { get; set; }
             public int CompanyRate { get; set; }
             public List<CompanyFeature> CompanyFeatures { get; set; }
             public double Franchise { get; set; }
@@ -536,6 +638,36 @@ namespace InsuranceServices.Controllers
             request.Seek(0, SeekOrigin.Begin);
             string bodyData = new StreamReader(request).ReadToEnd();
             return JsonConvert.DeserializeObject(bodyData);
+        }
+
+        private class ContractForGeneration
+        {
+            public DateTime TermFrom { get; set; }
+            public DateTime TermTo { get; set; }
+            public double Franchise { get; set; }
+            public string CompanyCode { get; set; }
+            public string ClientName { get; set; }
+            public string ClientSurname { get; set; }
+            public string ClientFathername { get; set; }
+            public string Address { get; set; }
+            public string PersonalCode { get; set; }
+            public string EDRPOU { get; set; }
+            public string Phone { get; set; }
+            public DateTime DateOfBirth { get; set; }
+            public string DocumentType { get; set; }
+            public string DocumentSeria { get; set; }
+            public string DocumentNumber { get; set; }
+            public DateTime DateOfIssued { get; set; }
+            public string IssuedBy { get; set; }
+            public string PlaceOfRegistration { get; set; }
+            public bool IsTaxi { get; set; }
+            public bool IsOTK { get; set; }
+            public string CarSubType { get; set; }
+            public string RegistrationNumber { get; set; }
+            public string Mark { get; set; }
+            public string Model { get; set; }
+            public string VinCode { get; set; }
+            public int Year { get; set; }
         }
 
         //private void GetPlaceOfRegistration(dynamic dataParsed, ref CityOfRegistration cityOfRegistration, ref CountryOfRegistration countryOfRegistration)
@@ -565,6 +697,31 @@ namespace InsuranceServices.Controllers
             }
 
             return null;
+        }
+
+        private string GetPlaceOfReg(dynamic dataParsed)
+        {
+            if (dataParsed.placeReg.placeType == "code")
+            {
+                int currentCode = Convert.ToInt32(dataParsed.placeReg.code.codeNum);
+                TSC tsc = db.TSC.Where(t => t.Code == currentCode).First();
+                return tsc.CityOfRegistration.Name;
+            }
+            if (dataParsed.placeReg.placeType == "address")
+            {
+                if (dataParsed.placeReg.foreign == "false")
+                {
+                    string currentCity = Convert.ToString(dataParsed.plaplaceRegce.city);
+                    return currentCity;
+                }
+                else
+                {
+                    string currentCountry = Convert.ToString(dataParsed.placeReg.foreign);
+                    return currentCountry;
+                }
+            }
+
+            return "";
         }
 
         public class Transport

@@ -15,40 +15,20 @@ namespace InsuranceServices.Models
             ClientCar = new HashSet<ClientCar>();
             Contract = new HashSet<Contract>();
             Document = new HashSet<Document>();
+            IndividualClient = new HashSet<IndividualClient>();
+            LegalEntityClient = new HashSet<LegalEntityClient>();
         }
 
         public int Id { get; set; }
 
         public bool IsLegalEntity { get; set; }
 
-        [StringLength(50)]
-        public string Surname { get; set; }
-
-        [StringLength(40)]
-        public string Name { get; set; }
-
-        [StringLength(50)]
-        public string FatherName { get; set; }
-
-        [StringLength(150)]
-        public string EntityName { get; set; }
-
-        [Column(TypeName = "date")]
-        public DateTime? DateOfBirth { get; set; }
-
-        [StringLength(10)]
-        public string PersonalCode { get; set; }
-
-        [StringLength(10)]
-        public string EDRPOU { get; set; }
-
         [Required]
         [StringLength(500)]
         public string Address { get; set; }
 
-        public int? IdPrivileges { get; set; }
-
-        public virtual Privileges Privileges { get; set; }
+        [StringLength(14)]
+        public string Phone { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ClientCar> ClientCar { get; set; }
@@ -58,5 +38,11 @@ namespace InsuranceServices.Models
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Document> Document { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<IndividualClient> IndividualClient { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<LegalEntityClient> LegalEntityClient { get; set; }
     }
 }

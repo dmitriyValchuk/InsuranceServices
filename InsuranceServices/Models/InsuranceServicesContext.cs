@@ -40,6 +40,7 @@ namespace InsuranceServices.Models
         public virtual DbSet<DocumentType> DocumentType { get; set; }
         public virtual DbSet<Franchise> Franchise { get; set; }
         public virtual DbSet<ImageType> ImageType { get; set; }
+        public virtual DbSet<IndividualClient> IndividualClient { get; set; }
         public virtual DbSet<InsuranceZoneOfRegistration> InsuranceZoneOfRegistration { get; set; }
         public virtual DbSet<K1> K1 { get; set; }
         public virtual DbSet<K2> K2 { get; set; }
@@ -48,6 +49,7 @@ namespace InsuranceServices.Models
         public virtual DbSet<K5> K5 { get; set; }
         public virtual DbSet<K6> K6 { get; set; }
         public virtual DbSet<K7> K7 { get; set; }
+        public virtual DbSet<LegalEntityClient> LegalEntityClient { get; set; }
         public virtual DbSet<Middleman> Middleman { get; set; }
         public virtual DbSet<Privileges> Privileges { get; set; }
         public virtual DbSet<RegioneOfRegistration> RegioneOfRegistration { get; set; }
@@ -133,6 +135,18 @@ namespace InsuranceServices.Models
 
             modelBuilder.Entity<Client>()
                 .HasMany(e => e.Document)
+                .WithRequired(e => e.Client)
+                .HasForeignKey(e => e.IdClient)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Client>()
+                .HasMany(e => e.IndividualClient)
+                .WithRequired(e => e.Client)
+                .HasForeignKey(e => e.IdClient)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Client>()
+                .HasMany(e => e.LegalEntityClient)
                 .WithRequired(e => e.Client)
                 .HasForeignKey(e => e.IdClient)
                 .WillCascadeOnDelete(false);
@@ -390,11 +404,6 @@ namespace InsuranceServices.Models
                 .WithRequired(e => e.Middleman)
                 .HasForeignKey(e => e.IdMiddleman)
                 .WillCascadeOnDelete(false);
-
-            modelBuilder.Entity<Privileges>()
-                .HasMany(e => e.Client)
-                .WithOptional(e => e.Privileges)
-                .HasForeignKey(e => e.IdPrivileges);
 
             modelBuilder.Entity<RegioneOfRegistration>()
                 .HasMany(e => e.CityOfRegistration)

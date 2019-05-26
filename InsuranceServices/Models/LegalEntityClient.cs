@@ -6,11 +6,21 @@ namespace InsuranceServices.Models
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Data.Entity.Spatial;
 
-    public partial class Privileges
+    [Table("LegalEntityClient")]
+    public partial class LegalEntityClient
     {
         public int Id { get; set; }
 
-        [StringLength(100)]
+        public int IdClient { get; set; }
+
+        [Required]
+        [StringLength(150)]
         public string Name { get; set; }
+
+        [Required]
+        [StringLength(8)]
+        public string EDRPOU { get; set; }
+
+        public virtual Client Client { get; set; }
     }
 }
