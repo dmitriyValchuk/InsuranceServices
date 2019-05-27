@@ -601,8 +601,19 @@ namespace InsuranceServices.Controllers
             }
 
             contractForGeneration.PlaceOfRegistration = GetPlaceOfReg(dataParsed);
+            contractForGeneration.IsTaxi = dataParsed.taxi;
+            contractForGeneration.IsOTK = dataParsed.OTK;
+            contractForGeneration.CarSubType = dataParsed.transExtra;
+            contractForGeneration.RegistrationNumber = dataParsed.autoNumber;
+            contractForGeneration.Mark = dataParsed.mark;
+            contractForGeneration.Model = dataParsed.model;
+            contractForGeneration.VinCode = dataParsed.classis;
+            contractForGeneration.Year = dataParsed.autoYear;
+
+            contractForGeneration.DateOfPayment = DateTime.Now;
+            contractForGeneration.DateOfTheContract = DateTime.Now;
             
-            return null;
+            return "Success!";
         }
 
         private class DataWithWarningToSend
@@ -668,6 +679,8 @@ namespace InsuranceServices.Controllers
             public string Model { get; set; }
             public string VinCode { get; set; }
             public int Year { get; set; }
+            public DateTime DateOfPayment { get; set; }
+            public DateTime DateOfTheContract { get; set; }
         }
 
         //private void GetPlaceOfRegistration(dynamic dataParsed, ref CityOfRegistration cityOfRegistration, ref CountryOfRegistration countryOfRegistration)
