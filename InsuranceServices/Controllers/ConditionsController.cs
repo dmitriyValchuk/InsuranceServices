@@ -645,27 +645,27 @@ namespace InsuranceServices.Controllers
                 {"Код страховика", contractForGeneration.CompanyCode.ToString()},
                 {"ГП", "00"},
                 {"ХП", "00"},
-                {"ДП", contractForGeneration.TermFrom.Day.ToString()},
-                {"МП", contractForGeneration.TermFrom.Month.ToString()},
-                {"РП", contractForGeneration.TermFrom.Year.ToString()},
-                {"ДЗ", contractForGeneration.TermTo.Day.ToString()},
-                {"МЗ", contractForGeneration.TermTo.Month.ToString()},
-                {"РЗ", contractForGeneration.TermTo.Year.ToString()},
-                {"Розмір франшизи", contractForGeneration.Franchise.ToString()},
+                {"ДП", contractForGeneration.TermFrom.Day < 10 ? "0" + contractForGeneration.TermFrom.Day.ToString() : contractForGeneration.TermFrom.Day.ToString()},
+                {"МП", contractForGeneration.TermFrom.Month < 10 ? "0" + contractForGeneration.TermFrom.Month.ToString() : contractForGeneration.TermFrom.Month.ToString()},
+                {"РП", Convert.ToString(contractForGeneration.TermFrom.Year.ToString()[2]) + Convert.ToString(contractForGeneration.TermFrom.Year.ToString()[3])},
+                {"ДЗ", contractForGeneration.TermTo.Day < 10 ? "0" + contractForGeneration.TermTo.Day.ToString() : contractForGeneration.TermTo.Day.ToString()},
+                {"МЗ", contractForGeneration.TermTo.Month < 10 ? "0" + contractForGeneration.TermTo.Month.ToString() : contractForGeneration.TermTo.Month.ToString()},
+                {"РЗ", Convert.ToString(contractForGeneration.TermTo.Year.ToString()[2]) + Convert.ToString(contractForGeneration.TermTo.Year.ToString()[3])},
+                {"Розмір франшизи", contractForGeneration.Franchise.ToString() + " гривень"},
                 {"Прізвище", contractForGeneration.ClientSurname.ToString()},//add field companyName
                 {"Ім'я", contractForGeneration.ClientName.ToString()},
                 {"По батькові", contractForGeneration.ClientFathername.ToString()},
                 {"Код ЄДРПОУ", contractForGeneration.EDRPOU == null ? "" : contractForGeneration.EDRPOU.ToString()},
                 {"Адреса", contractForGeneration.Address.ToString()},
-                {"ДН", contractForGeneration.DateOfBirth == null ? "" : contractForGeneration.DateOfBirth.Day.ToString()},
-                {"МН", contractForGeneration.DateOfBirth == null ? "" : contractForGeneration.DateOfBirth.Month.ToString()},
+                {"ДН", contractForGeneration.DateOfBirth == null ? "" : contractForGeneration.DateOfBirth.Day < 10 ? "0" + contractForGeneration.DateOfBirth.Day.ToString() : contractForGeneration.DateOfBirth.Day.ToString()},
+                {"МН", contractForGeneration.DateOfBirth == null ? "" : contractForGeneration.DateOfBirth.Month < 10 ? "0" +  contractForGeneration.DateOfBirth.Month.ToString() : contractForGeneration.DateOfBirth.Month.ToString()},
                 {"РН", contractForGeneration.DateOfBirth == null ? "" : contractForGeneration.DateOfBirth.Year.ToString()},
                 {"Код ІНПП", contractForGeneration.PersonalCode == null ? "" : contractForGeneration.PersonalCode.ToString()},
                 {"Тип документу", contractForGeneration.DocumentType == null ? "" : contractForGeneration.DocumentType.ToString()},
                 {"Серія документу", contractForGeneration.DocumentSeria == null ? "" : contractForGeneration.DocumentSeria.ToString()},
                 {"Номер документу", contractForGeneration.DocumentNumber == null ? "" : contractForGeneration.DocumentNumber.ToString()},
-                {"ДВ", contractForGeneration.DateOfIssued == null ? "" : contractForGeneration.DateOfIssued.Day.ToString()},
-                {"МВ", contractForGeneration.DateOfIssued == null ? "" : contractForGeneration.DateOfIssued.Month.ToString()},
+                {"ДВ", contractForGeneration.DateOfIssued == null ? "" : contractForGeneration.DateOfIssued.Day < 10 ? "0" + contractForGeneration.DateOfIssued.Day.ToString() : contractForGeneration.DateOfIssued.Day.ToString()},
+                {"МВ", contractForGeneration.DateOfIssued == null ? "" : contractForGeneration.DateOfIssued.Month < 10 ? "0" + contractForGeneration.DateOfIssued.Month.ToString() : contractForGeneration.DateOfIssued.Month.ToString()},
                 {"РВ", contractForGeneration.DateOfIssued == null ? "" : contractForGeneration.DateOfIssued.Year.ToString()},
                 {"Орган, що видав документ", contractForGeneration.IssuedBy == null ? "" : contractForGeneration.IssuedBy.ToString()},
                 {"Тип ТЗ", contractForGeneration.CarSubType.ToString()},
@@ -680,21 +680,18 @@ namespace InsuranceServices.Controllers
                 {"Будь-хто?", "Так"},
                 {"Місяці використання", "x"},//add function which will be return needed count of 'x'
                 {"Дата наступного ОТК", "x"},//add function which will be calculate date next otk-------------------------------------------------
-                {"ДС", DateTime.Now.Date.ToString()},
-                {"МС", DateTime.Now.Month.ToString()},
-                {"РС", DateTime.Now.Year.ToString()},
-                {"ДУ", DateTime.Now.Day.ToString()},
-                {"МУ", DateTime.Now.Month.ToString()},
-                {"РУ", DateTime.Now.Year.ToString()},
+                {"ДС", DateTime.Now.Day < 10 ? "0" + DateTime.Now.Day.ToString() : DateTime.Now.Day.ToString()},
+                {"МС", DateTime.Now.Month < 10 ? "0" + DateTime.Now.Month.ToString() : DateTime.Now.Month.ToString()},
+                {"РС", Convert.ToString(DateTime.Now.Year.ToString()[2]) + Convert.ToString(DateTime.Now.Year.ToString()[3])},
+                {"ДУ", DateTime.Now.Day < 10 ? "0" + DateTime.Now.Day.ToString() : DateTime.Now.Day.ToString()},
+                {"МУ", DateTime.Now.Month < 10 ? "0" + DateTime.Now.Month.ToString() : DateTime.Now.Month.ToString()},
+                {"РУ", Convert.ToString(DateTime.Now.Year.ToString()[2]) + Convert.ToString(DateTime.Now.Year.ToString()[3])},
                 {"ПІБ", contractForGeneration.ClientSurname.ToString() + ' ' + contractForGeneration.ClientName[0].ToString().ToUpper() + '.' + contractForGeneration.ClientFathername[0].ToString().ToUpper() + '.'}
             };
 
             var engine = new Engine();
             string serverPath = Server.MapPath("~/Content/contracts/");
             string startPath = Path.Combine(serverPath, "template.docx");
-            //string finalPath = Path.Combine(serverPath, contractForGeneration.ClientSurname + 
-            //    "_(" + DateTime.Now.Year.ToString() + ")_" + contractForGeneration.RegistrationNumber + 
-            //    "_(" + contractForGeneration.CompanyCode + ")_" + ".docx");
             string finalPath = Path.Combine(serverPath, "templateOut.docx");
 
             engine.Merge(startPath, fieldValues, finalPath);
