@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>EasyDox</name>
+    </assembly>
+    <members>
+        <member name="M:EasyDox.Docx.MergeInplace(EasyDox.Engine,System.String,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            Merges <paramref name="fieldValues"/> into the docx template specified by <paramref name="docxPath"/> and replaces the original file.
+            </summary>
+            <param name="engine">Expression evaluation engine.</param>
+            <param name="docxPath">Template and output path.</param>
+            <param name="fieldValues">A dictionary of field values keyed by field name.</param>
+            <returns></returns>
+        </member>
+        <member name="M:EasyDox.Engine.#ctor(System.Collections.Generic.Dictionary{System.String,System.Delegate}[])">
+            <summary>
+            Creates the templating engine with a specified set of user-defined functions.
+            </summary>
+        </member>
+        <member name="T:EasyDox.Literal">
+            <summary>
+            Represents a literal string in an expression.
+            </summary>
+        </member>
+        <member name="T:EasyDox.Field">
+            <summary>
+            Represents a field reference in an expression.
+            </summary>
+        </member>
+        <member name="P:EasyDox.Field.Name">
+            <summary>
+            Gets the field name.
+            </summary>
+        </member>
+        <member name="M:EasyDox.Xlsx.MergeInplace(EasyDox.Engine,System.String,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            Merges <paramref name="fieldValues"/> into the xlsx template specified 
+            by <paramref name="xlsxPath"/> and replaces the original file.
+            </summary>
+            <param name="engine">Expression evaluation engine.</param>
+            <param name="xlsxPath">Template and output path.</param>
+            <param name="fieldValues">A dictionary of field values keyed by field name.</param>
+            <returns></returns>
+        </member>
+        <member name="M:EngineExtensions.Merge(EasyDox.Engine,System.String,System.Collections.Generic.Dictionary{System.String,System.String},System.String)">
+            <summary>
+            Merges the field values into the template specified by <paramref name="templatePath"/> and saves the output to <paramref name="outputPath"/>.
+            </summary>
+            <param name="engine"></param>
+            <param name="fieldValues">A dictionary of field values keyed by field name.</param>
+            <param name="templatePath">Path to template docx.</param>
+            <param name="outputPath">Path to output docx.</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

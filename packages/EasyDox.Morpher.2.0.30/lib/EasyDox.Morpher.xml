@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>EasyDox.Morpher</name>
+    </assembly>
+    <members>
+        <member name="T:EasyDox.MorpherFunctionPack">
+            <summary>
+            Предоставляет функции склонения по падежам и прописи денежных сумм на русском языке.
+            </summary>
+        </member>
+        <member name="M:EasyDox.MorpherFunctionPack.#ctor(Morpher.Russian.IDeclension,Morpher.Russian.INumberSpelling)">
+            <summary>
+            Creates a new instance of the <see cref="T:EasyDox.MorpherFunctionPack"/>.
+            </summary>
+        </member>
+        <member name="P:EasyDox.MorpherFunctionPack.Functions">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:EasyDox.MorpherFunctionPack.ФамилияИнициалы(System.String)">
+            <summary>
+            Сокращает ФИО до Фамилия И. О.
+            </summary>
+            <param name="fieldValue">ФИО</param>
+            <returns>Фамилия И. О.</returns>
+        </member>
+    </members>
+</doc>

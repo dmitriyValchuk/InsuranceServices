@@ -101,3 +101,13 @@ E:\Диплом\InsuranceServices\InsuranceServices\obj\Debug\InsuranceServices.
 E:\Диплом\InsuranceServices\InsuranceServices\obj\Debug\InsuranceServices.csproj.CopyComplete
 E:\Диплом\InsuranceServices\InsuranceServices\obj\Debug\InsuranceServices.dll
 E:\Диплом\InsuranceServices\InsuranceServices\obj\Debug\InsuranceServices.pdb
+E:\Диплом\InsuranceServices\InsuranceServices\bin\EasyDox.dll
+E:\Диплом\InsuranceServices\InsuranceServices\bin\EasyDox.Morpher.dll
+E:\Диплом\InsuranceServices\InsuranceServices\bin\Morpher.API.dll
+E:\Диплом\InsuranceServices\InsuranceServices\bin\Morpher.AppConfigFactory.dll
+E:\Диплом\InsuranceServices\InsuranceServices\bin\Morpher.Dynamic.dll
+E:\Диплом\InsuranceServices\InsuranceServices\bin\Morpher.Generic.dll
+E:\Диплом\InsuranceServices\InsuranceServices\bin\Morpher.WebService.V2.dll
+E:\Диплом\InsuranceServices\InsuranceServices\bin\EasyDox.xml
+E:\Диплом\InsuranceServices\InsuranceServices\bin\EasyDox.Morpher.xml
+E:\Диплом\InsuranceServices\InsuranceServices\bin\ru\EntityFramework.SqlServer.resources.dll

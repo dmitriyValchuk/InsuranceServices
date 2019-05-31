@@ -7,6 +7,7 @@ using System.Web.Mvc;
 using System.Web.Script.Serialization;
 using InsuranceServices.Models;
 using Newtonsoft.Json;
+using EasyDox;
 
 namespace InsuranceServices.Controllers
 {
@@ -469,6 +470,7 @@ namespace InsuranceServices.Controllers
                         //}
 
                         companyToSend.CompanyName = company.Name;
+                        companyToSend.IdCompanyMiddleman = middlemanId;
                         companyToSend.CompanyRate = 90;//companyDetail.SummaryRait;
 
                         //var companyFeaturesToCompany = db.CompanyFeatureToCompany.Where(cftc => cftc.IdCompany == company.Id).ToList();
@@ -495,6 +497,22 @@ namespace InsuranceServices.Controllers
                         //companyToSend.ImageSize = companyIMG.ImageType.Name;
                         //companyToSend.PageCompanyInfoPath = companyIMG.ReferensToCompanyPage;
 
+                        companyToSend.Coefs = new List<CoefToSend>
+                        {
+                            new CoefToSend { Name="baseCoef", Value=baseCoef},
+                            new CoefToSend {Name="K1", Value=K1Value},
+                            new CoefToSend {Name="K2", Value=K2Value},
+                            new CoefToSend {Name="K3", Value=K3Value},
+                            new CoefToSend {Name="K4", Value=K4Value},
+                            new CoefToSend {Name="K5", Value=K5Value},
+                            new CoefToSend {Name="K6", Value=K6Value},
+                            new CoefToSend {Name="K7", Value=K7Value},
+                            new CoefToSend {Name="BM", Value=BMValue},
+                            new CoefToSend {Name="KPark", Value=KParkValue},
+                            new CoefToSend {Name="KPilg", Value=KPilgValue}
+                        };
+                        //companyToSend.Coefs = new List<double>() { baseCoef, K1Value, K2Value, K3Value, K4Value, K5Value, K6Value, K7Value, BMValue, KParkValue, KPilgValue };
+                        
                         companyToSends.Add(companyToSend);
                     }
                     if (franchises == null || franchises.Count == 0)
@@ -524,11 +542,11 @@ namespace InsuranceServices.Controllers
             ContractForGeneration contractForGeneration = new ContractForGeneration();
 
             //waith while from front will be get this field
-            int idCompanyMiddleman = dataParsed.idCompanyMiddlemanl;
+            int idCompanyMiddleman = Convert.ToInt32(dataParsed.idCompanyMiddleman);
             int companyCode = db.CompanyMiddleman.Where(cm => cm.Id == idCompanyMiddleman).Select(cm => cm.Company.Code).FirstOrDefault();
             contractForGeneration.CompanyCode = '0' + companyCode.ToString();
-            DateTime dateFrom = dataParsed.termFrom;
-            DateTime dateTo = dataParsed.termTo;
+            DateTime dateFrom = Convert.ToDateTime(dataParsed.termFrom);
+            DateTime dateTo = Convert.ToDateTime(dataParsed.termTo);
             double franchise = Convert.ToDouble(dataParsed.frans);
             contractForGeneration.TermFrom = dateFrom;
             contractForGeneration.TermTo = dateTo;
@@ -570,6 +588,7 @@ namespace InsuranceServices.Controllers
                 }
                 individualClient.DateOfBirth = dataParsed.personalData.dateOfBirth;
                 individualClient.PersonalCode = dataParsed.personalData.inn;
+                individualClient.IdClient = idClient;
                 db.IndividualClient.Add(individualClient);
                 db.SaveChanges();
             }
@@ -577,7 +596,7 @@ namespace InsuranceServices.Controllers
             if (client.IsLegalEntity)
             {
                 LegalEntityClient legalEntityClient = db.LegalEntityClient.Where(lec => lec.IdClient == idClient).FirstOrDefault();
-                contractForGeneration.ClientName = legalEntityClient.Name;
+                contractForGeneration.ClientSurname = legalEntityClient.Name;
                 contractForGeneration.EDRPOU = legalEntityClient.EDRPOU;
             }
             else
@@ -600,20 +619,87 @@ namespace InsuranceServices.Controllers
                 contractForGeneration.IssuedBy = dataParsed.documents.issuedBy;
             }
 
-            contractForGeneration.PlaceOfRegistration = GetPlaceOfReg(dataParsed);
+            contractForGeneration.PlaceOfRegistration = GetPlaceOfReg(dataParsed);//trouble
             contractForGeneration.IsTaxi = dataParsed.taxi;
-            contractForGeneration.IsOTK = dataParsed.OTK;
+            contractForGeneration.IsOTK = dataParsed.otk;
             contractForGeneration.CarSubType = dataParsed.transExtra;
             contractForGeneration.RegistrationNumber = dataParsed.autoNumber;
             contractForGeneration.Mark = dataParsed.mark;
             contractForGeneration.Model = dataParsed.model;
-            contractForGeneration.VinCode = dataParsed.classis;
+            contractForGeneration.VinCode = dataParsed.chassis;
             contractForGeneration.Year = dataParsed.autoYear;
+
+            //contractForGeneration.Coefs = dataParsed.coefs;
 
             contractForGeneration.DateOfPayment = DateTime.Now;
             contractForGeneration.DateOfTheContract = DateTime.Now;
-            
-            return "Success!";
+
+            string finalDocument = GenerateContract(contractForGeneration);
+
+            return js.Serialize(finalDocument);
+        }
+
+        private string GenerateContract(ContractForGeneration contractForGeneration)
+        {
+            var fieldValues = new Dictionary<string, string> {
+                {"Код страховика", contractForGeneration.CompanyCode.ToString()},
+                {"ГП", "00"},
+                {"ХП", "00"},
+                {"ДП", contractForGeneration.TermFrom.Day.ToString()},
+                {"МП", contractForGeneration.TermFrom.Month.ToString()},
+                {"РП", contractForGeneration.TermFrom.Year.ToString()},
+                {"ДЗ", contractForGeneration.TermTo.Day.ToString()},
+                {"МЗ", contractForGeneration.TermTo.Month.ToString()},
+                {"РЗ", contractForGeneration.TermTo.Year.ToString()},
+                {"Розмір франшизи", contractForGeneration.Franchise.ToString()},
+                {"Прізвище", contractForGeneration.ClientSurname.ToString()},//add field companyName
+                {"Ім'я", contractForGeneration.ClientName.ToString()},
+                {"По батькові", contractForGeneration.ClientFathername.ToString()},
+                {"Код ЄДРПОУ", contractForGeneration.EDRPOU == null ? "" : contractForGeneration.EDRPOU.ToString()},
+                {"Адреса", contractForGeneration.Address.ToString()},
+                {"ДН", contractForGeneration.DateOfBirth == null ? "" : contractForGeneration.DateOfBirth.Day.ToString()},
+                {"МН", contractForGeneration.DateOfBirth == null ? "" : contractForGeneration.DateOfBirth.Month.ToString()},
+                {"РН", contractForGeneration.DateOfBirth == null ? "" : contractForGeneration.DateOfBirth.Year.ToString()},
+                {"Код ІНПП", contractForGeneration.PersonalCode == null ? "" : contractForGeneration.PersonalCode.ToString()},
+                {"Тип документу", contractForGeneration.DocumentType == null ? "" : contractForGeneration.DocumentType.ToString()},
+                {"Серія документу", contractForGeneration.DocumentSeria == null ? "" : contractForGeneration.DocumentSeria.ToString()},
+                {"Номер документу", contractForGeneration.DocumentNumber == null ? "" : contractForGeneration.DocumentNumber.ToString()},
+                {"ДВ", contractForGeneration.DateOfIssued == null ? "" : contractForGeneration.DateOfIssued.Day.ToString()},
+                {"МВ", contractForGeneration.DateOfIssued == null ? "" : contractForGeneration.DateOfIssued.Month.ToString()},
+                {"РВ", contractForGeneration.DateOfIssued == null ? "" : contractForGeneration.DateOfIssued.Year.ToString()},
+                {"Орган, що видав документ", contractForGeneration.IssuedBy == null ? "" : contractForGeneration.IssuedBy.ToString()},
+                {"Тип ТЗ", contractForGeneration.CarSubType.ToString()},
+                {"Номер ТЗ", contractForGeneration.RegistrationNumber.ToString()},
+                {"Марка ТЗ", contractForGeneration.Mark.ToString()},
+                {"Модель ТЗ", contractForGeneration.Model.ToString()},
+                {"Рік випуску", contractForGeneration.Year.ToString()},
+                {"ВІН код", contractForGeneration.VinCode.ToString()},
+                {"Місце реєстрації ТЗ", contractForGeneration.PlaceOfRegistration.ToString()},
+                {"Таксі?", contractForGeneration.IsTaxi ? "Так" : "Ні"},
+                {"ОТК?", contractForGeneration.IsOTK ? "Так" : "Ні"},
+                {"Будь-хто?", "Так"},
+                {"Місяці використання", "x"},//add function which will be return needed count of 'x'
+                {"Дата наступного ОТК", "x"},//add function which will be calculate date next otk-------------------------------------------------
+                {"ДС", DateTime.Now.Date.ToString()},
+                {"МС", DateTime.Now.Month.ToString()},
+                {"РС", DateTime.Now.Year.ToString()},
+                {"ДУ", DateTime.Now.Day.ToString()},
+                {"МУ", DateTime.Now.Month.ToString()},
+                {"РУ", DateTime.Now.Year.ToString()},
+                {"ПІБ", contractForGeneration.ClientSurname.ToString() + ' ' + contractForGeneration.ClientName[0].ToString().ToUpper() + '.' + contractForGeneration.ClientFathername[0].ToString().ToUpper() + '.'}
+            };
+
+            var engine = new Engine();
+            string serverPath = Server.MapPath("~/Content/contracts/");
+            string startPath = Path.Combine(serverPath, "template.docx");
+            //string finalPath = Path.Combine(serverPath, contractForGeneration.ClientSurname + 
+            //    "_(" + DateTime.Now.Year.ToString() + ")_" + contractForGeneration.RegistrationNumber + 
+            //    "_(" + contractForGeneration.CompanyCode + ")_" + ".docx");
+            string finalPath = Path.Combine(serverPath, "templateOut.docx");
+
+            engine.Merge(startPath, fieldValues, finalPath);
+
+            return "Content/contracts/templateOut.docx";
         }
 
         private class DataWithWarningToSend
@@ -629,6 +715,12 @@ namespace InsuranceServices.Controllers
             public string IconPath { get; set; }
         }
 
+        public class CoefToSend
+        {
+            public string Name { get; set; }
+            public double Value { get; set; }
+        }
+
         public class CompanyToSend
         {
             public string CompanyName { get; set; }
@@ -641,6 +733,7 @@ namespace InsuranceServices.Controllers
             public string ImgPath { get; set; }
             public string ImageSize { get; set; }
             public string PageCompanyInfoPath { get; set; }
+            public List<CoefToSend> Coefs { get; set; }
         }
 
         private dynamic GetPotsRequestBody()
@@ -679,6 +772,8 @@ namespace InsuranceServices.Controllers
             public string Model { get; set; }
             public string VinCode { get; set; }
             public int Year { get; set; }
+            public List<CoefToSend> Coefs { get; set; }
+            public double TotalPrice { get; set; }
             public DateTime DateOfPayment { get; set; }
             public DateTime DateOfTheContract { get; set; }
         }
@@ -724,7 +819,7 @@ namespace InsuranceServices.Controllers
             {
                 if (dataParsed.placeReg.foreign == "false")
                 {
-                    string currentCity = Convert.ToString(dataParsed.plaplaceRegce.city);
+                    string currentCity = Convert.ToString(dataParsed.placeReg.city);
                     return currentCity;
                 }
                 else
